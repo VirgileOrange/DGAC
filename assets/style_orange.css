@@ -1,0 +1,534 @@
+/*
+ * Styles personnalisés pour l'application de scoring des candidats - Thème Orange
+ * Couleurs: Noir, Blanc, Orange (#FF7900)
+ * Police: Helvetica Neue
+ */
+
+/* Variables CSS pour les couleurs - Thème Orange */
+:root {
+    --primary-color: #FF7900;
+    --secondary-color: #FFB375;
+    --success-color: #10B981;
+    --warning-color: #FF7900;
+    --error-color: #EF4444;
+    --background-color: #000000;
+    --background-secondary: #1A1A1A;
+    --card-background: #1A1A1A;
+    --card-hover: #2A2A2A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E5E5E5;
+    --text-muted: #999999;
+    --border-color: #333333;
+    --gradient-primary: linear-gradient(135deg, #FFB375 0%, #FF7900 100%);
+    --gradient-dark: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
+}
+
+/* Police Helvetica Neue */
+* {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+/* Style global */
+.stApp {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+}
+
+/* Override Streamlit defaults pour le thème Orange */
+.main .block-container {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+}
+
+/* Tous les textes en blanc */
+.stMarkdown, .stText, p, span, div {
+    color: var(--text-primary) !important;
+}
+
+/* En-tête personnalisé avec logo */
+.main-header {
+    background: var(--gradient-primary);
+    padding: 2.5rem;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(255, 121, 0, 0.3);
+    border: 1px solid rgba(255, 179, 117, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.main-header-logo {
+    width: 20%;
+    max-width: 150px;
+    height: auto;
+    object-fit: contain;
+}
+
+.main-header-content {
+    flex: 1;
+    text-align: center;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    color: white !important;
+}
+
+.main-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.95;
+    font-size: 1.1rem;
+    color: white !important;
+}
+
+/* Cartes personnalisées */
+.custom-card {
+    background-color: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.custom-card:hover {
+    background-color: var(--card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 121, 0, 0.3);
+    border-color: var(--primary-color);
+}
+
+.custom-card h3 {
+    color: var(--text-primary) !important;
+}
+
+.custom-card strong {
+    color: var(--primary-color) !important;
+}
+
+/* Boutons personnalisés */
+.stButton > button {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.stButton > button:hover {
+    background-color: var(--card-hover) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 4px 12px rgba(255, 121, 0, 0.3);
+}
+
+button[kind="primary"] {
+    background: var(--gradient-primary) !important;
+    border: none !important;
+    color: white !important;
+}
+
+button[kind="primary"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 121, 0, 0.4) !important;
+}
+
+button[kind="secondary"] {
+    background-color: transparent !important;
+    color: var(--primary-color) !important;
+    border: 2px solid var(--primary-color) !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Métriques personnalisées */
+.metric-container {
+    background: var(--gradient-dark);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(255, 121, 0, 0.2);
+}
+
+.metric-container h3 {
+    color: var(--primary-color) !important;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.metric-container .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    margin: 0.5rem 0;
+}
+
+.metric-container .metric-delta {
+    color: var(--text-secondary) !important;
+    font-size: 1rem;
+}
+
+/* Tableau Streamlit standard - Thème Orange */
+.dataframe {
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-testid="stTable"] {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+[data-testid="stTable"] table {
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-testid="stTable"] th {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid var(--primary-color) !important;
+}
+
+[data-testid="stTable"] td {
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+[data-testid="stTable"] tr:hover td {
+    background-color: var(--card-hover) !important;
+}
+
+/* Sidebar personnalisée - Thème Orange */
+.css-1d391kg, [data-testid="stSidebar"] {
+    background-color: var(--background-secondary) !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown {
+    color: var(--text-primary) !important;
+}
+
+/* Onglets personnalisés */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background-color: transparent;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px 8px 0 0;
+    background-color: var(--card-background);
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background-color: var(--card-hover);
+    color: var(--text-primary) !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Messages personnalisés */
+.stSuccess, [data-testid="stAlert"][data-type="success"] {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+    border: 1px solid #10B981;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.stError, [data-testid="stAlert"][data-type="error"] {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border: 1px solid #EF4444;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.stWarning, [data-testid="stAlert"][data-type="warning"] {
+    background-color: rgba(255, 121, 0, 0.1);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.stInfo, [data-testid="stAlert"][data-type="info"] {
+    background-color: rgba(255, 121, 0, 0.1);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Spinner personnalisé */
+.stSpinner > div {
+    border-color: var(--primary-color) !important;
+}
+
+/* Expander personnalisé */
+.streamlit-expanderHeader {
+    background-color: var(--card-background);
+    color: var(--text-primary) !important;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.streamlit-expanderHeader:hover {
+    background-color: var(--card-hover);
+}
+
+/* Checkbox et radio */
+.stCheckbox label, .stRadio label {
+    color: var(--text-primary) !important;
+}
+
+/* Text input et text area */
+.stTextInput input, .stTextArea textarea {
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.stTextInput input:focus, .stTextArea textarea:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px rgba(255, 121, 0, 0.2) !important;
+}
+
+/* Select boxes */
+.stSelectbox div[data-baseweb="select"] {
+    background-color: var(--card-background) !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div {
+    background-color: var(--card-background) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Code blocks */
+.stCodeBlock, pre {
+    background-color: var(--background-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+code {
+    color: var(--primary-color) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Style pour les badges de rang */
+.rank-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 8px;
+}
+
+.rank-badge.gold {
+    background: linear-gradient(135deg, #FF7900 0%, #FFB375 100%);
+    color: white;
+    border: 1px solid #FF7900;
+    box-shadow: 0 2px 8px rgba(255, 121, 0, 0.3);
+}
+
+.rank-badge.silver {
+    background: linear-gradient(135deg, #E5E7EB 0%, #9CA3AF 100%);
+    color: #1F2937;
+    border: 1px solid #9CA3AF;
+    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
+}
+
+.rank-badge.bronze {
+    background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
+    color: white;
+    border: 1px solid #CD7F32;
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.3);
+}
+
+/* Style pour la visualisation des CVs */
+.cv-viewer-container {
+    background-color: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+}
+
+.cv-viewer-header {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cv-viewer-header h2 {
+    color: var(--text-primary) !important;
+}
+
+/* Effet de surbrillance pour le meilleur candidat */
+.best-candidate {
+    background: var(--gradient-dark);
+    border: 2px solid var(--primary-color);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(255, 121, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.best-candidate::before {
+    content: "🏆";
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-size: 3rem;
+    opacity: 0.1;
+}
+
+.best-candidate h3 {
+    color: var(--primary-color) !important;
+    margin: 0;
+}
+
+.best-candidate p {
+    color: var(--text-primary) !important;
+}
+
+/* Métrique Streamlit personnalisée */
+[data-testid="metric-container"] {
+    background-color: var(--card-background);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+[data-testid="metric-container"] label {
+    color: var(--text-secondary) !important;
+}
+
+[data-testid="metric-container"] [data-testid="metric-value"] {
+    color: var(--text-primary) !important;
+}
+
+/* Style pour le dashboard */
+.dashboard-container {
+    background-color: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+}
+
+.image-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.plot-image-container {
+    background-color: var(--background-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* Boutons de navigation personnalisés */
+.nav-button {
+    background-color: var(--card-background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.nav-button:hover:not(:disabled) {
+    background-color: var(--card-hover);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Style pour les graphiques matplotlib dans le thème Orange */
+.plot-title {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .main-header-logo {
+        width: 30%;
+        max-width: 100px;
+    }
+
+    .main-header h1 {
+        font-size: 2rem;
+    }
+
+    .custom-card {
+        padding: 1rem;
+    }
+
+    .metric-container .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-container {
+        padding: 1rem;
+    }
+}

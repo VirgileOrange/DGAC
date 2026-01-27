@@ -1,0 +1,44 @@
+{
+    "paths": {
+        "data_directory": "data/LYS(LyonStEx)",
+        "database_path": "output/documents.db",
+        "logs_directory": "output/logs"
+    },
+    "assets": {
+        "css_path": "assets/style_orange.css",
+        "logo_path": "data/logo/logo_orange.png"
+    },
+    "extraction": {
+        "primary_backend": "pypdf2",
+        "fallback_backend": "pdfplumber",
+        "max_file_size_mb": 500,
+        "supported_extensions": [".pdf"]
+    },
+    "indexing": {
+        "batch_size": 100,
+        "commit_frequency": 100,
+        "skip_existing": true,
+        "log_progress_every": 100
+    },
+    "search": {
+        "default_limit": 50,
+        "max_limit": 500,
+        "snippet_length": 150,
+        "bm25_weights": {
+            "filename": 1.0,
+            "content": 10.0
+        },
+        "tokenizer": "unicode61"
+    },
+    "gui": {
+        "page_title": "PDF Search Engine",
+        "results_per_page": 20,
+        "enable_pdf_preview": true
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "max_file_size_mb": 10,
+        "backup_count": 5
+    }
+}
