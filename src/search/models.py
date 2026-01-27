@@ -5,7 +5,7 @@ Defines dataclasses for search queries and results used
 throughout the search module.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 

@@ -11,11 +11,8 @@ from pathlib import Path
 from src.core.config_loader import (
     Config,
     PathsConfig,
-    AssetsConfig,
-    ExtractionConfig,
     get_config,
     reload_config,
-    _find_config_file
 )
 from src.core.exceptions import ConfigurationError
 
@@ -108,7 +105,7 @@ class TestGetConfig:
 
     def test_reload_config_creates_new_instance(self, temp_config: Path, reset_config_singleton):
         """Test that reload_config creates a fresh instance."""
-        config1 = get_config(temp_config)
+        _config1 = get_config(temp_config)  # noqa: F841
 
         # Modify config file
         with open(temp_config, "r") as f:

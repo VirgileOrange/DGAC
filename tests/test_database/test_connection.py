@@ -5,7 +5,6 @@ Tests connection creation, context managers, and SQLite configuration.
 """
 
 import sqlite3
-import pytest
 from pathlib import Path
 
 from src.database.connection import DatabaseManager
@@ -24,7 +23,7 @@ class TestDatabaseManager:
         """Test that manager creates parent directories."""
         db_path = temp_dir / "subdir" / "nested" / "test.db"
 
-        manager = DatabaseManager(db_path)
+        _manager = DatabaseManager(db_path)  # noqa: F841
 
         assert db_path.parent.exists()
 

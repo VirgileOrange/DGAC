@@ -5,7 +5,6 @@ Tests logger setup, configuration, and output handling.
 """
 
 import logging
-import pytest
 from pathlib import Path
 
 from src.core.logger import setup_logging, get_logger
@@ -74,8 +73,8 @@ class TestGetLogger:
         """Test that multiple loggers share the same configuration."""
         setup_logging(log_level="WARNING")
 
-        logger1 = get_logger("module1")
-        logger2 = get_logger("module2")
+        _logger1 = get_logger("module1")  # noqa: F841
+        _logger2 = get_logger("module2")  # noqa: F841
 
         # Both should have same effective level from root
         root_level = logging.getLogger().level
