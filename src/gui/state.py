@@ -6,7 +6,7 @@ session state values used across the application.
 """
 
 import streamlit as st
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 
 DEFAULT_STATE = {

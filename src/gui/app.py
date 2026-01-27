@@ -28,7 +28,6 @@ from src.gui.components import (  # noqa: E402
     render_sidebar,
     render_search_bar,
     render_results,
-    render_pdf_viewer
 )
 from src.gui.components.search_bar import render_search_header, render_no_results  # noqa: E402
 from src.gui.components.results_list import render_pagination  # noqa: E402

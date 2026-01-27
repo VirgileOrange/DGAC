@@ -224,7 +224,7 @@ class DocumentRepository:
 
 
 if __name__ == "__main__":
-    from .schema import init_schema, reset_schema
+    from .schema import init_schema
 
     init_schema()
 

@@ -160,7 +160,6 @@ def get_statistics() -> dict:
 if __name__ == "__main__":
     import tempfile
     from pathlib import Path
-    from .connection import DatabaseManager
 
     with tempfile.TemporaryDirectory() as tmpdir:
         test_db = Path(tmpdir) / "test.db"

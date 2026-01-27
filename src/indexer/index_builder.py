@@ -7,7 +7,7 @@ extracting text, and storing in the database with progress tracking.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, List, Set
 
 from ..core import get_config, get_logger, ExtractionError
 from ..database import init_schema, reset_schema, DocumentRepository

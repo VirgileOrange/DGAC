@@ -7,7 +7,6 @@ download fallback for unsupported browsers.
 
 import base64
 from pathlib import Path
-from typing import Optional
 
 import streamlit as st
 

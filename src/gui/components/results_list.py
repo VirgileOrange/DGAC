@@ -48,9 +48,6 @@ def _render_actions(result: SearchResult) -> None:
     """Render action buttons for a result."""
     col1, col2, col3 = st.columns(3)
 
-    show_pdf_key = f"show_pdf_{result.id}"
-    show_content_key = f"show_content_{result.id}"
-
     with col1:
         if st.button("Voir le PDF", key=f"pdf_btn_{result.id}", use_container_width=True):
             current = get_state("show_pdf", {})
