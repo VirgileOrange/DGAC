@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
 
-from ..core import get_logger, DatabaseError
+from ..core import get_logger
 from .connection import get_connection, get_cursor
 
 logger = get_logger(__name__)

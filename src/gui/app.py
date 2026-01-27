@@ -17,22 +17,22 @@ _project_root = Path(__file__).parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import streamlit as st
+import streamlit as st  # noqa: E402
 
-from src.core import get_config, get_logger
-from src.database import init_schema
-from src.search import BM25Engine, SearchQuery
+from src.core import get_config, get_logger  # noqa: E402
+from src.database import init_schema  # noqa: E402
+from src.search import BM25Engine, SearchQuery  # noqa: E402
 
-from src.gui.state import init_state, get_state, set_state, get_pagination_state
-from src.gui.components import (
+from src.gui.state import init_state, get_state, set_state, get_pagination_state  # noqa: E402
+from src.gui.components import (  # noqa: E402
     render_sidebar,
     render_search_bar,
     render_results,
     render_pdf_viewer
 )
-from src.gui.components.search_bar import render_search_header, render_no_results
-from src.gui.components.results_list import render_pagination
-from src.gui.components.pdf_viewer import render_pdf_from_state
+from src.gui.components.search_bar import render_search_header, render_no_results  # noqa: E402
+from src.gui.components.results_list import render_pagination  # noqa: E402
+from src.gui.components.pdf_viewer import render_pdf_from_state  # noqa: E402
 
 logger = get_logger(__name__)
 
