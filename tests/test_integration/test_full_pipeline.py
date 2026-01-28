@@ -11,7 +11,6 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from src.database.schema import init_schema, get_statistics
 from src.database.repository import DocumentRepository

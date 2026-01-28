@@ -4,8 +4,6 @@ Tests for the FTS5 query parser.
 Tests query sanitization, operator handling, and term extraction.
 """
 
-import pytest
-
 from src.search.query_parser import QueryParser
 
 

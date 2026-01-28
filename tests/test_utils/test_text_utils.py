@@ -4,8 +4,6 @@ Tests for text utility functions.
 Tests text cleaning, truncation, and keyword extraction.
 """
 
-import pytest
-
 from src.utils.text_utils import (
     clean_text,
     truncate_text,

@@ -5,7 +5,6 @@ Tests hashing, size calculation, path manipulation, and directory creation.
 All tests use temporary files/directories for safety.
 """
 
-import pytest
 from pathlib import Path
 
 from src.utils.file_utils import (
@@ -151,7 +150,7 @@ class TestEnsureDirectory:
         nested_dir = temp_dir / "level1" / "level2" / "level3"
         assert not nested_dir.exists()
 
-        result = ensure_directory(nested_dir)
+        ensure_directory(nested_dir)
 
         assert nested_dir.exists()
         assert nested_dir.is_dir()
