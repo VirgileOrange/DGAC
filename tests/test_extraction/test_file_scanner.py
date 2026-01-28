@@ -4,7 +4,6 @@ Tests for the file scanner module.
 Tests PDF file discovery and filtering in directory trees.
 """
 
-import pytest
 from pathlib import Path
 
 from src.extraction.file_scanner import FileScanner

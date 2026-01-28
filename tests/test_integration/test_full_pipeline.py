@@ -10,9 +10,7 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 - Never touches real data directories
 """
 
-import json
 import pytest
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 from src.database.schema import init_schema, get_statistics

@@ -124,7 +124,7 @@ class TestDatabaseManagerExecute:
             cursor.execute("CREATE TABLE test (id INTEGER, value TEXT)")
 
         data = [(1, "a"), (2, "b"), (3, "c")]
-        count = manager.executemany("INSERT INTO test VALUES (?, ?)", data)
+        manager.executemany("INSERT INTO test VALUES (?, ?)", data)
 
         with manager.connection() as conn:
             result = conn.execute("SELECT COUNT(*) FROM test").fetchone()

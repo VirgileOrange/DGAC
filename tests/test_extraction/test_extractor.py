@@ -6,7 +6,6 @@ Tests text extraction with fallback backend handling.
 
 import pytest
 from pathlib import Path
-from typing import List, Tuple
 
 from src.extraction.extractor import PDFExtractor
 

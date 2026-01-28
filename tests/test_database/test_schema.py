@@ -10,9 +10,6 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 - Never touches real data directories
 """
 
-import pytest
-from pathlib import Path
-
 from src.database.schema import init_schema, reset_schema, get_statistics
 from src.database.connection import get_connection, get_cursor
 

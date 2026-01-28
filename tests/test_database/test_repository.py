@@ -11,7 +11,6 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 """
 
 import pytest
-from pathlib import Path
 
 from src.database.schema import init_schema
 from src.database.repository import DocumentRepository
