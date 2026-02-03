@@ -107,6 +107,7 @@ output/
 # Data folder - exclude everything except logo
 data/*
 !data/logo/
+*.zip
 
 # PDFs (safety measure)
 *.pdf
