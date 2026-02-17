@@ -81,6 +81,29 @@ class LoggingConfig:
 
 
 @dataclass
+class SemanticConfig:
+    """Configuration for semantic search and embedding."""
+    enabled: bool
+    endpoint: str
+    api_key: str
+    model: str
+    embedding_model: str
+    embedding_dimensions: int
+    max_chunk_chars: int
+    chunk_overlap_chars: int
+    embedding_batch_size: int
+
+
+@dataclass
+class HybridConfig:
+    """Configuration for hybrid search combining lexical and semantic."""
+    default_mode: str
+    rrf_k: int
+    default_lexical_weight: float
+    default_semantic_weight: float
+
+
+@dataclass
 class Config:
     """
     Main configuration container holding all config sections.
@@ -94,6 +117,8 @@ class Config:
     search: SearchConfig
     gui: GUIConfig
     logging: LoggingConfig
+    semantic: SemanticConfig
+    hybrid: HybridConfig
     project_root: Path = field(default_factory=Path)
 
     @classmethod
@@ -189,6 +214,27 @@ class Config:
             backup_count=log_data.get("backup_count", 5)
         )
 
+        semantic_data = data.get("semantic", {})
+        semantic = SemanticConfig(
+            enabled=semantic_data.get("enabled", True),
+            endpoint=semantic_data.get("endpoint", ""),
+            api_key=semantic_data.get("api_key", ""),
+            model=semantic_data.get("model", "alfred-4.2"),
+            embedding_model=semantic_data.get("embedding_model", "multilingual-e5-large"),
+            embedding_dimensions=semantic_data.get("embedding_dimensions", 1024),
+            max_chunk_chars=semantic_data.get("max_chunk_chars", 1800),
+            chunk_overlap_chars=semantic_data.get("chunk_overlap_chars", 200),
+            embedding_batch_size=semantic_data.get("embedding_batch_size", 32)
+        )
+
+        hybrid_data = data.get("hybrid", {})
+        hybrid = HybridConfig(
+            default_mode=hybrid_data.get("default_mode", "hybrid"),
+            rrf_k=hybrid_data.get("rrf_k", 60),
+            default_lexical_weight=hybrid_data.get("default_lexical_weight", 1.0),
+            default_semantic_weight=hybrid_data.get("default_semantic_weight", 1.0)
+        )
+
         return cls(
             paths=paths,
             assets=assets,
@@ -197,6 +243,8 @@ class Config:
             search=search,
             gui=gui,
             logging=logging_cfg,
+            semantic=semantic,
+            hybrid=hybrid,
             project_root=project_root
         )
 

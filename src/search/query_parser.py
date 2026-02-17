@@ -14,7 +14,8 @@ logger = get_logger(__name__)
 
 
 # Characters with special meaning in FTS5 that need escaping
-FTS5_SPECIAL_CHARS = set('"\'*-+():^')
+# Note: '.' is the column filter operator in FTS5 (e.g., "filename:term")
+FTS5_SPECIAL_CHARS = set('"\'*-+():^.')
 
 
 class QueryParser:

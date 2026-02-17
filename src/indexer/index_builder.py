@@ -3,14 +3,15 @@ Main indexing pipeline for the PDF Search Engine.
 
 Orchestrates the complete indexing workflow: scanning files,
 extracting text, and storing in the database with progress tracking.
+Includes optional semantic indexing for vector search.
 """
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Set
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from ..core import get_config, get_logger, ExtractionError
-from ..database import init_schema, reset_schema, DocumentRepository
+from ..database import init_schema, reset_schema, DocumentRepository, get_connection
 from ..extraction import FileScanner, PDFExtractor
 from ..utils import get_file_hash, get_relative_path, clean_text
 
@@ -25,6 +26,8 @@ class IndexingStats:
     files_skipped: int = 0
     files_failed: int = 0
     pages_indexed: int = 0
+    chunks_indexed: int = 0
+    semantic_errors: int = 0
     errors: List[str] = field(default_factory=list)
 
 
@@ -34,12 +37,14 @@ class IndexBuilder:
 
     Handles file discovery, text extraction, and database storage
     with batching for performance and progress callbacks for UI.
+    Includes optional semantic indexing for vector search.
     """
 
     def __init__(
         self,
         reset: bool = False,
-        progress_callback: Callable[[int, int, str], None] = None
+        progress_callback: Callable[[int, int, str], None] = None,
+        semantic_enabled: Optional[bool] = None
     ):
         """
         Initialize the index builder.
@@ -48,6 +53,8 @@ class IndexBuilder:
             reset: If True, drop and recreate the database schema.
             progress_callback: Optional callback(current, total, filename)
                               called during indexing for progress updates.
+            semantic_enabled: Override config semantic.enabled setting.
+                             If None, uses config value.
         """
         self.config = get_config()
         self.reset = reset
@@ -60,6 +67,14 @@ class IndexBuilder:
         self.batch_size = self.config.indexing.batch_size
         self.skip_existing = self.config.indexing.skip_existing
         self.log_every = self.config.indexing.log_progress_every
+
+        if semantic_enabled is None:
+            self.semantic_enabled = self.config.semantic.enabled
+        else:
+            self.semantic_enabled = semantic_enabled
+
+        self.semantic_indexer = None
+        self._pending_semantic: List[Dict] = []
 
     def build(self) -> IndexingStats:
         """
@@ -76,6 +91,9 @@ class IndexBuilder:
             reset_schema()
         else:
             init_schema()
+
+        if self.semantic_enabled:
+            self._init_semantic_indexer()
 
         indexed_paths = self._get_indexed_paths() if self.skip_existing else set()
 
@@ -97,11 +115,18 @@ class IndexBuilder:
                 self.progress_callback(i + 1, stats.files_scanned, filepath.name)
 
             try:
-                pages_added = self._process_file(filepath, batch)
+                pages_added, pages_data = self._process_file_with_pages(filepath, batch)
 
                 if pages_added > 0:
                     stats.files_indexed += 1
                     stats.pages_indexed += pages_added
+
+                    if self.semantic_enabled and pages_data:
+                        self._pending_semantic.append({
+                            "filepath": filepath,
+                            "filename": filepath.name,
+                            "pages": pages_data
+                        })
 
             except ExtractionError as e:
                 stats.files_failed += 1
@@ -129,11 +154,67 @@ class IndexBuilder:
             self._commit_batch(batch)
 
         logger.info(
-            f"Indexing complete: {stats.files_indexed} files indexed, "
+            f"FTS5 indexing complete: {stats.files_indexed} files indexed, "
             f"{stats.pages_indexed} pages, {stats.files_failed} failures"
         )
 
+        if self.semantic_enabled and self._pending_semantic:
+            self._run_semantic_indexing(stats)
+
         return stats
+
+    def _init_semantic_indexer(self) -> None:
+        """Initialize the semantic indexer lazily."""
+        if self.semantic_indexer is None:
+            from .semantic_indexer import SemanticIndexer
+            self.semantic_indexer = SemanticIndexer(
+                progress_callback=self.progress_callback,
+                enabled=self.semantic_enabled
+            )
+            self.semantic_indexer.ensure_schema()
+            logger.info("Semantic indexer initialized")
+
+    def _run_semantic_indexing(self, stats: IndexingStats) -> None:
+        """Run semantic indexing for all pending documents."""
+        logger.info(f"Starting semantic indexing for {len(self._pending_semantic)} documents")
+
+        for doc_data in self._pending_semantic:
+            filepath = doc_data["filepath"]
+            filename = doc_data["filename"]
+            pages = doc_data["pages"]
+
+            try:
+                doc_id = self._get_doc_id_for_filepath(str(filepath))
+                if doc_id is None:
+                    logger.warning(f"No doc_id found for {filename}, skipping semantic")
+                    continue
+
+                chunks_count = self.semantic_indexer.index_document(
+                    doc_id=doc_id,
+                    pages=pages,
+                    filename=filename
+                )
+                stats.chunks_indexed += chunks_count
+
+            except Exception as e:
+                stats.semantic_errors += 1
+                logger.error(f"Semantic indexing failed for {filename}: {e}")
+
+        self._pending_semantic.clear()
+
+        logger.info(
+            f"Semantic indexing complete: {stats.chunks_indexed} chunks, "
+            f"{stats.semantic_errors} errors"
+        )
+
+    def _get_doc_id_for_filepath(self, filepath: str) -> Optional[int]:
+        """Get the document ID for a filepath from the database."""
+        with get_connection() as conn:
+            row = conn.execute(
+                "SELECT id FROM documents WHERE filepath = ? LIMIT 1",
+                (filepath,)
+            ).fetchone()
+            return row["id"] if row else None
 
     def _get_indexed_paths(self) -> Set[str]:
         """Get set of already indexed file paths."""
@@ -150,14 +231,34 @@ class IndexBuilder:
         Returns:
             Number of pages extracted.
         """
+        pages_added, _ = self._process_file_with_pages(filepath, batch)
+        return pages_added
+
+    def _process_file_with_pages(
+        self,
+        filepath: Path,
+        batch: List[tuple]
+    ) -> Tuple[int, List[Tuple[int, str]]]:
+        """
+        Extract and prepare a single PDF for indexing.
+
+        Args:
+            filepath: Path to the PDF file.
+            batch: List to append document tuples to.
+
+        Returns:
+            Tuple of (pages_count, list of (page_num, cleaned_content) tuples).
+        """
         pages = self.extractor.extract(filepath)
 
         if not pages:
-            return 0
+            return 0, []
 
         file_hash = get_file_hash(filepath)
         relative_path = get_relative_path(filepath, self.config.paths.data_directory)
         filename = filepath.name
+
+        pages_data: List[Tuple[int, str]] = []
 
         for page_num, content in pages:
             cleaned_content = clean_text(content)
@@ -174,7 +275,9 @@ class IndexBuilder:
                 file_hash
             ))
 
-        return len(pages)
+            pages_data.append((page_num, cleaned_content))
+
+        return len(pages), pages_data
 
     def _commit_batch(self, batch: List[tuple]) -> int:
         """

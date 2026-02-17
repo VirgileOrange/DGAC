@@ -19,6 +19,12 @@ DEFAULT_STATE = {
     "results_per_page": 20,
     "current_page": 1,
     "advanced_search": False,
+    "search_mode": "hybrid",
+    "lexical_weight": 1.0,
+    "semantic_weight": 1.0,
+    "selected_doc_search_query": None,
+    "selected_doc_search_mode": None,
+    "selected_doc_chunk_content": None,
 }
 
 

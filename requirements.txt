@@ -7,9 +7,21 @@ streamlit>=1.28.0
 PyPDF2>=3.0.0
 pdfplumber>=0.10.0
 
+# PDF rendering with annotations
+PyMuPDF>=1.23.0
+
 # pdfplumber transitive dependencies (installed automatically but pinned for reproducibility)
 Pillow>=9.0.0
 pdfminer.six>=20221105
+
+# Semantic search - OpenAI-compatible API client
+openai>=1.0.0
+
+# Semantic search - Vector operations
+numpy>=1.24.0
+
+# Semantic search - SQLite vector extension
+sqlite-vec>=0.1.0
 
 # Testing
 pytest>=7.0.0

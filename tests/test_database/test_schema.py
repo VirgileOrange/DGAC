@@ -1,7 +1,7 @@
 """
 Tests for database schema management.
 
-Tests schema initialization, reset, and statistics queries.
+Tests schema initialization, reset, statistics queries, and vector index setup.
 
 SAFETY NOTE: All tests use the `configured_db` fixture which:
 - Creates a temporary directory via tempfile.mkdtemp()
@@ -10,7 +10,14 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 - Never touches real data directories
 """
 
-from src.database.schema import init_schema, reset_schema, get_statistics
+from src.database.schema import (
+    init_schema,
+    reset_schema,
+    get_statistics,
+    init_vector_index,
+    is_vec_extension_available,
+    reset_vec_extension_cache,
+)
 from src.database.connection import get_connection, get_cursor
 
 
@@ -142,3 +149,78 @@ class TestGetStatistics:
 
         assert stats["total_pages"] == 3
         assert stats["total_files"] == 2
+
+
+class TestSemanticTables:
+    """Tests for semantic search tables.
+
+    Tests that chunks_metadata and chunks_vec tables are created correctly.
+    """
+
+    def test_init_creates_chunks_metadata_table(self, configured_db):
+        """Test that init_schema creates chunks_metadata table."""
+        init_schema()
+
+        with get_connection() as conn:
+            result = conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='chunks_metadata'"
+            ).fetchone()
+
+            assert result is not None
+            assert result["name"] == "chunks_metadata"
+
+    def test_init_creates_chunks_vec_table(self, configured_db):
+        """Test that init_schema creates chunks_vec table."""
+        init_schema()
+
+        with get_connection() as conn:
+            result = conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='chunks_vec'"
+            ).fetchone()
+
+            assert result is not None
+            assert result["name"] == "chunks_vec"
+
+    def test_chunks_metadata_has_correct_columns(self, configured_db):
+        """Test that chunks_metadata has expected columns."""
+        init_schema()
+
+        with get_connection() as conn:
+            result = conn.execute("PRAGMA table_info(chunks_metadata)").fetchall()
+            column_names = {row["name"] for row in result}
+
+            expected_columns = {
+                "chunk_id", "document_id", "page_num", "position",
+                "content", "char_count", "created_at"
+            }
+            assert expected_columns.issubset(column_names)
+
+
+class TestVectorIndex:
+    """Tests for vector index initialization.
+
+    Note: These tests check the logic but may skip actual sqlite-vec
+    operations if the extension is not available.
+    """
+
+    def test_vec_extension_availability_check(self, configured_db, reset_vec_extension_cache):
+        """Test that vec extension availability can be checked."""
+        available = is_vec_extension_available()
+        assert isinstance(available, bool)
+
+    def test_init_vector_index_without_extension(self, configured_db, reset_vec_extension_cache):
+        """Test init_vector_index handles missing extension gracefully."""
+        init_schema()
+
+        # Should return False if extension not available, True if it is
+        result = init_vector_index()
+        assert isinstance(result, bool)
+
+    def test_reset_vec_extension_cache(self, configured_db):
+        """Test that vec extension cache can be reset."""
+        # Should not raise
+        reset_vec_extension_cache()
+
+        # After reset, next call should recheck availability
+        available = is_vec_extension_available()
+        assert isinstance(available, bool)

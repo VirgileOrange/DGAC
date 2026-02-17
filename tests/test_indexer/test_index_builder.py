@@ -81,12 +81,17 @@ class TestIndexBuilder:
 
 
 class TestIndexBuilderWithMockExtraction:
-    """Tests for index builder with mocked extraction."""
+    """Tests for index builder with mocked extraction and embedding API."""
 
     def test_build_returns_stats(self, temp_dir: Path, temp_config: Path,
                                   sample_pdf_collection: Path,
-                                  reset_config_singleton, reset_db_singleton):
-        """Test that build returns statistics."""
+                                  reset_config_singleton, reset_db_singleton,
+                                  mock_embedding_api):
+        """Test that build returns statistics.
+
+        Uses mock_embedding_api fixture to prevent real API calls
+        during semantic indexing.
+        """
         from src.core.config_loader import reload_config
 
         # Update config to use our sample collection
@@ -113,8 +118,12 @@ class TestIndexBuilderWithMockExtraction:
 
     def test_build_with_progress_callback(self, temp_dir: Path, temp_config: Path,
                                           sample_pdf_collection: Path,
-                                          reset_config_singleton, reset_db_singleton):
-        """Test that progress callback is called."""
+                                          reset_config_singleton, reset_db_singleton,
+                                          mock_embedding_api):
+        """Test that progress callback is called.
+
+        Uses mock_embedding_api fixture to prevent real API calls.
+        """
         from src.core.config_loader import reload_config
 
         # Update config
@@ -148,8 +157,12 @@ class TestIndexBuilderSkipExisting:
 
     def test_skip_existing_document(self, temp_dir: Path, temp_config: Path,
                                     sample_pdf_collection: Path,
-                                    reset_config_singleton, reset_db_singleton):
-        """Test that existing documents are skipped when skip_existing=True."""
+                                    reset_config_singleton, reset_db_singleton,
+                                    mock_embedding_api):
+        """Test that existing documents are skipped when skip_existing=True.
+
+        Uses mock_embedding_api fixture to prevent real API calls.
+        """
         from src.core.config_loader import reload_config
         from src.database.schema import init_schema
         from src.database.repository import DocumentRepository
@@ -191,8 +204,12 @@ class TestIndexBuilderSkipExisting:
 
     def test_index_single_file(self, temp_dir: Path, temp_config: Path,
                                sample_pdf: Path,
-                               reset_config_singleton, reset_db_singleton):
-        """Test indexing a single file."""
+                               reset_config_singleton, reset_db_singleton,
+                               mock_embedding_api):
+        """Test indexing a single file.
+
+        Uses mock_embedding_api fixture to prevent real API calls.
+        """
         from src.core.config_loader import get_config
 
         get_config(temp_config)

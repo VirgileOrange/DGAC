@@ -45,36 +45,55 @@ def render_search_bar() -> Tuple[str, bool]:
     return query, submitted or query_changed
 
 
+MODE_LABELS = {
+    "lexical": "Lexical",
+    "semantic": "Semantique",
+    "hybrid": "Hybride"
+}
+
+
 def render_search_header(stats) -> None:
     """
     Render search results header with stats.
 
     Args:
-        stats: SearchStats object with result information.
+        stats: SearchStats or HybridSearchStats object with result information.
     """
     if not stats:
         return
 
+    mode_label = ""
+    if hasattr(stats, "mode"):
+        mode_label = f" ({MODE_LABELS.get(stats.mode, stats.mode)})"
+
     col1, col2, col3 = st.columns([2, 2, 1])
 
     with col1:
-        st.markdown(f"**{stats.total_results:,}** résultats trouvés")
+        st.markdown(f"**{stats.total_results:,}** resultats trouves{mode_label}")
 
     with col2:
-        st.caption(f"Requête : \"{stats.query}\"")
+        st.caption(f"Requete : \"{stats.query}\"")
 
     with col3:
         st.caption(f"{stats.execution_time_ms:.0f} ms")
 
+    if hasattr(stats, "overlap_count") and stats.overlap_count > 0:
+        st.caption(
+            f"Sources : {stats.lexical_results} lexical, "
+            f"{stats.semantic_results} semantique, "
+            f"{stats.overlap_count} en commun"
+        )
+
 
 def render_no_results(query: str) -> None:
     """Display no results message with suggestions."""
-    st.info(f"Aucun résultat trouvé pour \"{query}\"")
+    st.info(f"Aucun resultat trouve pour \"{query}\"")
 
     with st.expander("Suggestions"):
         st.markdown("""
-        - Vérifiez l'orthographe
-        - Essayez avec moins de mots-clés ou des mots différents
+        - Verifiez l'orthographe
+        - Essayez avec moins de mots-cles ou des mots differents
+        - Essayez un autre mode de recherche (lexical, semantique, hybride)
         - Essayez sans les accents
-        - Utilisez la recherche avancée avec OR pour des alternatives
+        - Utilisez la recherche avancee avec OR pour des alternatives
         """)

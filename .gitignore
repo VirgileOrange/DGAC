@@ -111,3 +111,7 @@ data/*
 
 # PDFs (safety measure)
 *.pdf
+
+# Project documentation (internal)
+PDF_SEARCH_PROJECT.md
+SEMANTIC_SEARCH_ARCHITECTURE.md

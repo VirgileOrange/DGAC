@@ -128,3 +128,72 @@ class TestAssetsConfig:
 
         assert config.assets.css_path is not None
         assert config.assets.logo_path is not None
+
+
+class TestSemanticConfig:
+    """Tests for SemanticConfig section."""
+
+    def test_semantic_config_loaded(self, temp_config: Path, reset_config_singleton):
+        """Test that semantic config section is loaded."""
+        config = Config.from_file(temp_config)
+
+        assert hasattr(config, "semantic")
+        assert config.semantic.enabled is True
+        assert config.semantic.embedding_model == "multilingual-e5-large"
+        assert config.semantic.embedding_dimensions == 1024
+
+    def test_semantic_config_defaults(self, temp_dir: Path, reset_config_singleton):
+        """Test that semantic config has reasonable defaults."""
+        config_dir = temp_dir / "config"
+        config_dir.mkdir()
+        config_path = config_dir / "config.json"
+
+        minimal_config = {"paths": {}, "search": {}}
+        config_path.write_text(json.dumps(minimal_config))
+
+        config = Config.from_file(config_path)
+
+        assert hasattr(config, "semantic")
+        assert config.semantic.max_chunk_chars > 0
+        assert config.semantic.chunk_overlap_chars >= 0
+
+    def test_semantic_chunk_settings(self, temp_config: Path, reset_config_singleton):
+        """Test chunk-related settings are loaded correctly."""
+        config = Config.from_file(temp_config)
+
+        assert config.semantic.max_chunk_chars == 1800
+        assert config.semantic.chunk_overlap_chars == 200
+        assert config.semantic.embedding_batch_size == 32
+
+
+class TestHybridConfig:
+    """Tests for HybridConfig section."""
+
+    def test_hybrid_config_loaded(self, temp_config: Path, reset_config_singleton):
+        """Test that hybrid config section is loaded."""
+        config = Config.from_file(temp_config)
+
+        assert hasattr(config, "hybrid")
+        assert config.hybrid.default_mode == "hybrid"
+        assert config.hybrid.rrf_k == 60
+
+    def test_hybrid_config_weights(self, temp_config: Path, reset_config_singleton):
+        """Test that weight settings are loaded correctly."""
+        config = Config.from_file(temp_config)
+
+        assert config.hybrid.default_lexical_weight == 1.0
+        assert config.hybrid.default_semantic_weight == 1.0
+
+    def test_hybrid_config_defaults(self, temp_dir: Path, reset_config_singleton):
+        """Test that hybrid config has reasonable defaults."""
+        config_dir = temp_dir / "config"
+        config_dir.mkdir()
+        config_path = config_dir / "config.json"
+
+        minimal_config = {"paths": {}, "search": {}}
+        config_path.write_text(json.dumps(minimal_config))
+
+        config = Config.from_file(config_path)
+
+        assert hasattr(config, "hybrid")
+        assert config.hybrid.rrf_k > 0

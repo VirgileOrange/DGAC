@@ -21,7 +21,7 @@ import streamlit as st  # noqa: E402
 
 from src.core import get_config, get_logger  # noqa: E402
 from src.database import init_schema  # noqa: E402
-from src.search import BM25Engine, SearchQuery  # noqa: E402
+from src.search import HybridEngine, SearchMode  # noqa: E402
 
 from src.gui.state import init_state, get_state, set_state, get_pagination_state  # noqa: E402
 from src.gui.components import (  # noqa: E402
@@ -114,24 +114,27 @@ def _execute_search(query_text: str, options: dict) -> None:
         query_text: The search query string.
         options: Search options from sidebar.
     """
-    engine = BM25Engine()
-    pagination = get_pagination_state()
+    engine = HybridEngine()
 
-    query = SearchQuery(
-        text=query_text,
-        limit=options["results_per_page"],
-        offset=pagination["offset"],
-        advanced=options["advanced_search"]
-    )
+    mode_str = options.get("search_mode", "hybrid")
+    mode = SearchMode(mode_str)
 
     with st.spinner("Recherche en cours..."):
         try:
-            results, stats = engine.search(query, include_content=True)
+            results, stats = engine.search(
+                query=query_text,
+                mode=mode,
+                limit=options["results_per_page"],
+                lexical_weight=options.get("lexical_weight", 1.0),
+                semantic_weight=options.get("semantic_weight", 1.0)
+            )
 
             set_state("search_results", results)
             set_state("search_stats", stats)
 
-            logger.info(f"Search '{query_text}': {stats.total_results} results")
+            logger.info(
+                f"Search '{query_text}' ({mode_str}): {stats.total_results} results"
+            )
 
         except Exception as e:
             st.error(f"Erreur lors de la recherche : {e}")
@@ -172,13 +175,17 @@ def _render_welcome() -> None:
 
     Utilisez la barre de recherche ci-dessus pour trouver des documents dans votre collection PDF.
 
-    **Fonctionnalités :**
-    - Recherche plein texte avec classement BM25
-    - Visualisation des PDF directement dans le navigateur
-    - Navigation vers des pages spécifiques
-    - Opérateurs de recherche avancée
+    **Modes de recherche disponibles :**
+    - **Hybride** : Combine recherche lexicale et semantique (recommande)
+    - **Lexical** : Recherche par mots-cles exacts (BM25)
+    - **Semantique** : Recherche par sens et synonymes
 
-    Saisissez une requête pour commencer.
+    **Fonctionnalites :**
+    - Visualisation des PDF directement dans le navigateur
+    - Navigation vers des pages specifiques
+    - Operateurs de recherche avancee (mode lexical/hybride)
+
+    Selectionnez un mode dans la barre laterale et saisissez une requete pour commencer.
     """)
 
 

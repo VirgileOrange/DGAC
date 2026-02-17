@@ -2,37 +2,51 @@
 Results list component for displaying search results.
 
 Renders search results with snippets, actions, and pagination.
+Supports both SearchResult and HybridSearchResult objects.
 """
 
 import streamlit as st
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
-from ...search import SearchResult
+from ...search import SearchResult, HybridSearchResult
 from ..state import get_state, set_state
 
 
-def render_results(results: List[SearchResult]) -> None:
+SOURCE_LABELS = {
+    "lexical": "[L]",
+    "semantic": "[S]",
+    "both": "[L+S]"
+}
+
+
+def render_results(results: List[Union[SearchResult, HybridSearchResult]]) -> None:
     """
     Render the list of search results.
 
     Args:
-        results: List of SearchResult objects to display.
+        results: List of SearchResult or HybridSearchResult objects to display.
     """
     if not results:
         return
 
-    for result in results:
-        _render_result_card(result)
+    for idx, result in enumerate(results):
+        _render_result_card(result, idx)
 
 
-def _render_result_card(result: SearchResult) -> None:
+def _render_result_card(result: Union[SearchResult, HybridSearchResult], idx: int) -> None:
     """Render a single result card with expander."""
-    header = f"**{result.filename}** - Page {result.page_num}"
+    source_label = ""
+    if hasattr(result, "source"):
+        source_label = f" {SOURCE_LABELS.get(result.source, '')}"
+
+    header = f"**{result.filename}** - Page {result.page_num}{source_label}"
 
     with st.expander(header, expanded=False):
         st.caption(f"Chemin : {result.relative_path}")
-        st.caption(f"Score : {result.display_score:.2f}")
+
+        score_text = _format_score(result)
+        st.caption(score_text)
 
         st.markdown("---")
 
@@ -41,23 +55,44 @@ def _render_result_card(result: SearchResult) -> None:
 
         st.markdown("---")
 
-        _render_actions(result)
+        _render_actions(result, idx)
 
 
-def _render_actions(result: SearchResult) -> None:
+def _format_score(result: Union[SearchResult, HybridSearchResult]) -> str:
+    """Format score display based on result type."""
+    if hasattr(result, "source"):
+        parts = [f"Score : {result.score:.4f}"]
+
+        if hasattr(result, "similarity") and result.similarity is not None:
+            parts.append(f"Similarite : {result.similarity:.2%}")
+
+        if hasattr(result, "lexical_rank") and result.lexical_rank is not None:
+            parts.append(f"Rang lexical : {result.lexical_rank}")
+
+        if hasattr(result, "semantic_rank") and result.semantic_rank is not None:
+            parts.append(f"Rang semantique : {result.semantic_rank}")
+
+        return " | ".join(parts)
+
+    return f"Score : {result.display_score:.2f}"
+
+
+def _render_actions(result: Union[SearchResult, HybridSearchResult], idx: int) -> None:
     """Render action buttons for a result."""
+    result_id = _get_result_id(result, idx)
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("Voir le PDF", key=f"pdf_btn_{result.id}", use_container_width=True):
+        if st.button("Voir le PDF", key=f"pdf_btn_{result_id}", use_container_width=True):
             current = get_state("show_pdf", {})
-            current[result.id] = not current.get(result.id, False)
+            current[result_id] = not current.get(result_id, False)
             set_state("show_pdf", current)
 
     with col2:
-        if st.button("Texte complet", key=f"text_btn_{result.id}", use_container_width=True):
+        if st.button("Texte complet", key=f"text_btn_{result_id}", use_container_width=True):
             current = get_state("show_content", {})
-            current[result.id] = not current.get(result.id, False)
+            current[result_id] = not current.get(result_id, False)
             set_state("show_content", current)
 
     with col3:
@@ -71,27 +106,48 @@ def _render_actions(result: SearchResult) -> None:
             )
 
     show_pdf = get_state("show_pdf", {})
-    if show_pdf.get(result.id, False):
-        set_state("selected_doc_id", result.id)
+    if show_pdf.get(result_id, False):
+        set_state("selected_doc_id", result_id)
         set_state("selected_doc_path", result.filepath)
         set_state("selected_doc_page", result.page_num)
+        stats = get_state("search_stats")
+        if stats:
+            set_state("selected_doc_search_query", stats.query)
+            set_state("selected_doc_search_mode", stats.mode)
+        source = getattr(result, "source", "lexical")
+        if source in ("semantic", "both"):
+            set_state("selected_doc_chunk_content", result.snippet)
+        else:
+            set_state("selected_doc_chunk_content", None)
 
     show_content = get_state("show_content", {})
-    if show_content.get(result.id, False):
-        _render_full_content(result)
+    if show_content.get(result_id, False):
+        _render_full_content(result, result_id)
 
 
-def _render_full_content(result: SearchResult) -> None:
+def _get_result_id(result: Union[SearchResult, HybridSearchResult], idx: int) -> str:
+    """Get unique identifier for a result."""
+    if hasattr(result, "id"):
+        return f"{result.id}_{idx}"
+    return f"{result.document_id}_{result.page_num}_{idx}"
+
+
+def _render_full_content(
+    result: Union[SearchResult, HybridSearchResult],
+    result_id: str
+) -> None:
     """Render full page content in a text area."""
-    if result.content:
+    content = getattr(result, "content", None) or getattr(result, "snippet", "")
+
+    if content:
         st.text_area(
-            f"Contenu complet - Page {result.page_num}",
-            value=result.content,
+            f"Contenu - Page {result.page_num}",
+            value=content,
             height=300,
-            key=f"content_area_{result.id}"
+            key=f"content_area_{result_id}"
         )
     else:
-        st.info("Contenu non chargé. Relancez la recherche avec l'option contenu.")
+        st.info("Contenu non disponible pour ce resultat.")
 
 
 def render_pagination(total_results: int, results_per_page: int) -> None:

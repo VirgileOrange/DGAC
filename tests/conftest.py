@@ -1,8 +1,11 @@
 """
 Pytest fixtures and configuration for the test suite.
 
-Provides temporary directories, sample PDFs, and mock configurations
-to ensure tests are isolated and safe.
+Provides temporary directories, sample PDFs, mock configurations,
+and semantic search mocks to ensure tests are isolated and safe.
+
+All tests use temporary directories and mock external services.
+No real data is ever modified or accessed.
 """
 
 import json
@@ -10,7 +13,10 @@ import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
+from unittest.mock import Mock, patch
+
+import numpy as np
 
 import sys
 _project_root = Path(__file__).parent.parent
@@ -85,6 +91,22 @@ def temp_config(temp_dir: Path) -> Generator[Path, None, None]:
                 "content": 10.0
             },
             "tokenizer": "unicode61"
+        },
+        "semantic": {
+            "enabled": True,
+            "endpoint": "https://test.example.com/api/v2",
+            "api_key": "test-api-key",
+            "embedding_model": "multilingual-e5-large",
+            "embedding_dimensions": 1024,
+            "max_chunk_chars": 1800,
+            "chunk_overlap_chars": 200,
+            "embedding_batch_size": 32
+        },
+        "hybrid": {
+            "default_mode": "hybrid",
+            "rrf_k": 60,
+            "default_lexical_weight": 1.0,
+            "default_semantic_weight": 1.0
         },
         "gui": {
             "page_title": "Test PDF Search",
@@ -263,3 +285,172 @@ def configured_db(temp_config, reset_config_singleton, reset_db_singleton):
     get_config(temp_config)
     yield
     # Cleanup happens via reset fixtures
+
+
+@pytest.fixture
+def reset_embedding_singleton():
+    """
+    Reset the embedding service singleton between tests.
+    """
+    from src.search import embedding_service
+    embedding_service._embedding_service = None
+    yield
+    embedding_service._embedding_service = None
+
+
+@pytest.fixture
+def reset_vec_extension_cache():
+    """
+    Reset the sqlite-vec extension cache between tests.
+    """
+    from src.database import schema
+    schema._vec_extension_available = None
+    yield
+    schema._vec_extension_available = None
+
+
+@pytest.fixture
+def mock_embedding_response():
+    """
+    Create a mock embedding response matching OpenAI format.
+
+    Returns:
+        Function that creates mock response with specified dimensions.
+    """
+    def _create_response(texts: List[str], dimensions: int = 1024):
+        """
+        Create mock embedding response.
+
+        Args:
+            texts: List of input texts.
+            dimensions: Embedding dimensions.
+
+        Returns:
+            Mock response object.
+        """
+        mock_data = []
+        for i, text in enumerate(texts):
+            mock_item = Mock()
+            # Generate deterministic embeddings based on text content
+            np.random.seed(hash(text) % (2**32))
+            mock_item.embedding = np.random.randn(dimensions).tolist()
+            mock_data.append(mock_item)
+
+        mock_response = Mock()
+        mock_response.data = mock_data
+        return mock_response
+
+    return _create_response
+
+
+@pytest.fixture
+def mock_openai_client(mock_embedding_response):
+    """
+    Create a mock OpenAI client for embedding service tests.
+
+    Args:
+        mock_embedding_response: Fixture for creating mock responses.
+
+    Returns:
+        Mock OpenAI client.
+    """
+    mock_client = Mock()
+
+    def mock_create(model, input):
+        """Mock embeddings.create method."""
+        texts = input if isinstance(input, list) else [input]
+        return mock_embedding_response(texts)
+
+    mock_client.embeddings = Mock()
+    mock_client.embeddings.create = mock_create
+    return mock_client
+
+
+@pytest.fixture
+def sample_chunks():
+    """
+    Create sample SemanticChunk objects for testing.
+
+    Returns:
+        List of SemanticChunk objects.
+    """
+    from src.extraction.semantic_chunker import SemanticChunk
+
+    return [
+        SemanticChunk(
+            chunk_id="chunk001",
+            document_id=1,
+            page_num=1,
+            position=0,
+            content="Aviation safety regulations and procedures.",
+            char_count=45
+        ),
+        SemanticChunk(
+            chunk_id="chunk002",
+            document_id=1,
+            page_num=2,
+            position=0,
+            content="Air traffic control guidelines for civil aviation.",
+            char_count=50
+        ),
+        SemanticChunk(
+            chunk_id="chunk003",
+            document_id=2,
+            page_num=1,
+            position=0,
+            content="Maritime navigation and safety protocols.",
+            char_count=42
+        ),
+    ]
+
+
+@pytest.fixture
+def sample_embeddings():
+    """
+    Create sample embeddings for testing.
+
+    Returns:
+        numpy array of shape (3, 1024).
+    """
+    np.random.seed(42)
+    return np.random.randn(3, 1024).astype(np.float32)
+
+
+@pytest.fixture
+def mock_embedding_api(mock_embedding_response, reset_embedding_singleton):
+    """
+    Mock the OpenAI API for all embedding calls.
+
+    Patches the OpenAI client at the embedding_service module level
+    to prevent real API calls during tests. Returns deterministic
+    embeddings based on input text hash.
+
+    Args:
+        mock_embedding_response: Fixture for creating mock responses.
+        reset_embedding_singleton: Ensures fresh embedding service.
+
+    Yields:
+        Mock OpenAI client instance.
+    """
+    with patch('src.search.embedding_service.OpenAI') as MockOpenAI:
+        mock_client = Mock()
+
+        def mock_create(model, input):
+            """
+            Mock embeddings.create that returns deterministic embeddings.
+
+            Args:
+                model: Model name (ignored).
+                input: Text or list of texts to embed.
+
+            Returns:
+                Mock response with embedding data.
+            """
+            texts = input if isinstance(input, list) else [input]
+            return mock_embedding_response(texts)
+
+        mock_client.embeddings = Mock()
+        mock_client.embeddings.create = mock_create
+        MockOpenAI.return_value = mock_client
+
+        yield mock_client

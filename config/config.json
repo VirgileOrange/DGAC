@@ -40,5 +40,22 @@
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "max_file_size_mb": 10,
         "backup_count": 5
+    },
+    "semantic": {
+        "enabled": true,
+        "endpoint": "https://trust.liveintelligence.orange-business.com/api/v2",
+        "api_key": "ExHjFgBb.m8Vd5XiyBUY5nsTqu1P0pkqFdav84kJo",
+        "model": "alfred-4.2",
+        "embedding_model": "multilingual-e5-large",
+        "embedding_dimensions": 1024,
+        "max_chunk_chars": 1800,
+        "chunk_overlap_chars": 200,
+        "embedding_batch_size": 32
+    },
+    "hybrid": {
+        "default_mode": "hybrid",
+        "rrf_k": 60,
+        "default_lexical_weight": 1.0,
+        "default_semantic_weight": 1.0
     }
 }
