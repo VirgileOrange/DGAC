@@ -6,14 +6,14 @@ Provides storage and k-nearest-neighbor search using sqlite-vec extension.
 
 import struct
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 
 from ..core import get_config, get_logger
 from ..extraction.semantic_chunker import SemanticChunk
 from .connection import get_connection, get_cursor
-from .schema import _load_vec_extension, is_vec_extension_available
+from .schema import _load_vec_extension
 
 logger = get_logger(__name__)
 

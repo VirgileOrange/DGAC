@@ -8,7 +8,7 @@ and Reciprocal Rank Fusion for combining results.
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..core import get_config, get_logger
 from .bm25_engine import BM25Engine

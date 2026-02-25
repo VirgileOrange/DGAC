@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 
 from ..core import get_config, get_logger
 from ..database import get_connection
-from ..database.vector_repository import VectorRepository, VectorSearchResult
+from ..database.vector_repository import VectorRepository
 from .embedding_service import get_embedding_service
 
 logger = get_logger(__name__)

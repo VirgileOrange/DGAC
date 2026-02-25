@@ -296,7 +296,7 @@ class EmbeddingService:
                 # Other errors - re-raise
                 raise
 
-            except APIError as e:
+            except APIError:
                 retry_count += 1
                 delay = min(RETRY_DELAY * (1 + (retry_count - 1) * 0.5), MAX_RETRY_DELAY)
                 time.sleep(delay)
@@ -384,10 +384,10 @@ if __name__ == "__main__":
     for key, value in info.items():
         print(f"  {key}: {value}")
 
-    print(f"\nResilience settings:")
-    print(f"  Server error retry: unlimited (waits for recovery)")
+    print("\nResilience settings:")
+    print("  Server error retry: unlimited (waits for recovery)")
     print(f"  Base retry delay: {RETRY_DELAY}s")
     print(f"  Max retry delay: {MAX_RETRY_DELAY}s")
-    print(f"  Auto-split on token limit: enabled (up to 4 levels)")
+    print("  Auto-split on token limit: enabled (up to 4 levels)")
 
     print("\nNote: Actual embedding requires valid API credentials in config.")

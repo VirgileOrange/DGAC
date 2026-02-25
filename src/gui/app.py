@@ -23,7 +23,7 @@ from src.core import get_config, get_logger  # noqa: E402
 from src.database import init_schema  # noqa: E402
 from src.search import HybridEngine, SearchMode  # noqa: E402
 
-from src.gui.state import init_state, get_state, set_state, get_pagination_state  # noqa: E402
+from src.gui.state import init_state, get_state, set_state  # noqa: E402
 from src.gui.components import (  # noqa: E402
     render_sidebar,
     render_search_bar,

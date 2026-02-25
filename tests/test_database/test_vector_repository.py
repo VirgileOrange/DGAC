@@ -14,7 +14,7 @@ SAFETY NOTE: All tests use the `configured_db` fixture which:
 import pytest
 import numpy as np
 
-from src.database.schema import init_schema, init_vector_index, reset_vec_extension_cache
+from src.database.schema import init_schema, init_vector_index
 from src.database.vector_repository import VectorRepository, VectorSearchResult
 from src.extraction.semantic_chunker import SemanticChunk
 
